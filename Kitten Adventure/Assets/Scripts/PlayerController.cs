@@ -244,7 +244,7 @@ public class PlayerController : MonoBehaviour
 
 
             //jumping
-            if (Input.GetButtonDown("Jump") && cColl.IsTouchingLayers(ground))
+            if (Input.GetButton("Jump") && cColl.IsTouchingLayers(ground))
             {
                 Jump();
                 state = State.jumping;

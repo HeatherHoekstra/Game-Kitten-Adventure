@@ -10,7 +10,7 @@ public class HealthBarScript : MonoBehaviour
     public Image fill;
     public Image scared;
     private float speed = 55f;
-    private float amount = 2f;    
+    private float amount = 1f;    
 
     private void Update()
     {
