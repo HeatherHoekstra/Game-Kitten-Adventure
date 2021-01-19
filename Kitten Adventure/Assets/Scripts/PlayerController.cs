@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
     private CapsuleCollider2D cColl;    
     
     //FSM (Finite State Machine)
-    private enum State { idle, running, jumping, falling, dead, inBox, endLevel}
+    private enum State { idle, running, jumping, falling, dead, inBox, endLevel, endGame}
 
     private State state = State.idle;
 
@@ -69,7 +69,7 @@ public class PlayerController : MonoBehaviour
 
     private void PlayerSoundHandler()
     {
-        if (!purring.isPlaying && state == State.inBox ^ state == State.endLevel)
+        if (!purring.isPlaying && state == State.inBox ^ state == State.endLevel ^ state == State.endGame)
         {
             purring.Play();
                         
@@ -135,7 +135,7 @@ public class PlayerController : MonoBehaviour
         }
      }
 
-    //Collectables & fall off map & box & end level box
+    //Collectables & fall off map & box & end level box & end game basket
     private void OnTriggerEnter2D(Collider2D collision)
     {
         //Collectables
@@ -195,6 +195,19 @@ public class PlayerController : MonoBehaviour
 
             levelLoader.LoadNextLevel();
             
+        }
+
+        if(collision.tag == "EndGameBasket")
+        {
+            state = State.endGame;
+            rb.transform.position = collision.transform.position;
+            rb.transform.localScale = collision.transform.localScale;
+            rb.velocity = new Vector2(0, 0);
+            rb.gravityScale = 0;
+            frozen = true;
+            Destroy(collision.gameObject);
+
+            levelLoader.LoadNextLevel();
         }
     }
 

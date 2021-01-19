@@ -9,6 +9,7 @@ TagManager:
   - Fall
   - Box
   - EndLevelBox
+  - EndGameBasket
   layers:
   - Default
   - TransparentFX
