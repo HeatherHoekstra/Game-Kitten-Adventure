@@ -2,25 +2,26 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
 public class PlayerController : MonoBehaviour
 {
     //Start() variables
     private Rigidbody2D rb;
+
     private Animator anim;
     private Collider2D bColl;
-    private CapsuleCollider2D cColl;    
-    
+    private CapsuleCollider2D cColl;
+
     //FSM (Finite State Machine)
-    private enum State { idle, running, jumping, falling, dead, inBox, endLevel, endGame}
+    private enum State { idle, running, jumping, falling, dead, inBox, endLevel, endGame }
 
     private State state = State.idle;
 
     //Inspector (unity) variables
     [SerializeField] private LayerMask ground;
+
     [SerializeField] private float speed = 5f;
     [SerializeField] private float jumpForce = 20f;
-    [SerializeField]private float maxTime = 30f;
+    [SerializeField] private float maxTime = 30f;
     [SerializeField] private float yarnRed = 5f;
     [SerializeField] private float yarnBlue = 10f;
     [SerializeField] private float yarnGreen = 2f;
@@ -30,30 +31,35 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioSource hurt;
     [SerializeField] private Animator transition;
 
-
     //Other variables
-    public float timeLeft = 0f;    
+    public float timeLeft = 0f;
+
     private bool frozen = false;
     private bool canWalk = true;
     private bool pauseTimer = true;
     public float transitionTime = 1f;
 
+    private bool soundOn;
+
     public int currentLevel = 1;
-    
 
     //Functions from other scripts
     public HealthBarScript healthBar;
+
     public LevelLoaderScript levelLoader;
-            
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         bColl = GetComponent<Collider2D>();
-        cColl = GetComponent<CapsuleCollider2D>();               
+        cColl = GetComponent<CapsuleCollider2D>();
 
         timeLeft = maxTime;
-        healthBar.SetMaxHealth(maxTime);        
+        healthBar.SetMaxHealth(maxTime);
+
+        //PlayerPrefs.SetInt("CurrentLevel", 0);      
+        
     }
 
     private void Update()
@@ -61,30 +67,42 @@ public class PlayerController : MonoBehaviour
         Movement();
         AnimationState();
         anim.SetInteger("state", (int)state); //sets animation based on Enumerator state
-        TimeHandler();     
-        if(state == State.inBox)
+        TimeHandler();
+        if (state == State.inBox)
         {
             InBoxHandler();
         }
         PlayerSoundHandler();
-            
+    }
+
+    public void ChangeSound(bool on)
+    {
+        if (on)
+        {
+            soundOn = true;
+        }
+        else
+        {
+            soundOn = false;            
+        }
     }
 
     private void PlayerSoundHandler()
     {
-        if (!purring.isPlaying && state == State.inBox ^ state == State.endLevel ^ state == State.endGame)
+        if (soundOn)
         {
-            purring.Play();
-                        
-        }
-        else if (purring.isPlaying && state == State.running ^ state== State.jumping)
-        { purring.Stop(); }
+            if (!purring.isPlaying && state == State.inBox ^ state == State.endLevel ^ state == State.endGame)
+            {
+                purring.Play();
+            }
+            else if (purring.isPlaying && state == State.running ^ state == State.jumping)
+            { purring.Stop(); }
 
-        if(!hurt.isPlaying && state == State.dead)
-        {
-            hurt.Play();
+            if (!hurt.isPlaying && state == State.dead)
+            {
+                hurt.Play();
+            }
         }
-        
     }
 
     private void TimeHandler()
@@ -106,37 +124,36 @@ public class PlayerController : MonoBehaviour
             state = State.dead;
         }
 
-        if(state == State.inBox && timeLeft < maxTime)
+        if (state == State.inBox && timeLeft < maxTime)
         {
             pauseTimer = true;
             timeLeft += Time.deltaTime * 5;
             healthBar.SetHealth(timeLeft);
         }
 
-        if(state == State.running ^ state == State.jumping)
+        if (state == State.running ^ state == State.jumping)
         {
             pauseTimer = false;
         }
 
-        if(state == State.endLevel)
+        if (state == State.endLevel)
         {
             pauseTimer = true;
-          }
+        }
     }
 
     private void InBoxHandler()
     {
-        if(timeLeft < maxTime)
+        if (timeLeft < maxTime)
         {
-            frozen = true;            
-          }
+            frozen = true;
+        }
         else
         {
             frozen = false;
             state = State.inBox;
-            
         }
-     }
+    }
 
     //Collectables & fall off map & box & end level box & end game basket
     private void OnTriggerEnter2D(Collider2D collision)
@@ -144,7 +161,10 @@ public class PlayerController : MonoBehaviour
         //Collectables
         if (collision.tag == "Collectable" && collision.IsTouching(bColl))
         {
-            pickup.Play();
+            if (soundOn)
+            {
+                pickup.Play();
+            }
 
             Destroy(collision.gameObject);
 
@@ -164,8 +184,6 @@ public class PlayerController : MonoBehaviour
             {
                 timeLeft += yarnYellow;
             }
-
-
         }
 
         //Fall of the map
@@ -177,7 +195,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //box
-        if(collision.tag == "Box")
+        if (collision.tag == "Box")
         {
             state = State.inBox;
             rb.transform.position = collision.transform.position;
@@ -191,32 +209,28 @@ public class PlayerController : MonoBehaviour
         if (collision.tag == "EndLevelBox")
         {
             state = State.endLevel;
-            
+
             rb.transform.position = collision.transform.position;
             rb.transform.localScale = collision.transform.localScale;
             rb.velocity = new Vector2(0, 0);
             frozen = true;
-            
-            currentLevel++;
-            PlayerPrefs.SetInt("CurrentLevel", currentLevel);
 
             levelLoader.LoadNextLevel();
-            
         }
 
-        if(collision.tag == "EndGameBasket")
+        if (collision.tag == "EndGameBasket")
         {
             state = State.endGame;
-            
+
             rb.transform.position = collision.transform.position;
             rb.transform.localScale = collision.transform.localScale;
             rb.velocity = new Vector2(0, 0);
             rb.gravityScale = 0;
             frozen = true;
-            
+
             Destroy(collision.gameObject);
 
-            currentLevel = 1;
+            currentLevel = 0;
             PlayerPrefs.SetInt("CurrentLevel", currentLevel);
 
             levelLoader.LoadNextLevel();
@@ -258,7 +272,6 @@ public class PlayerController : MonoBehaviour
                 transform.localScale = new Vector2(-1, 1);
             }
 
-
             //moving right
             else if (hDirection > 0 && canWalk == true)
             //(Input.GetKey(KeyCode.D)) eerste versie
@@ -266,7 +279,6 @@ public class PlayerController : MonoBehaviour
                 rb.velocity = new Vector2(speed, rb.velocity.y);
                 transform.localScale = new Vector2(1, 1);
             }
-
 
             //jumping
             if (Input.GetButton("Jump") && cColl.IsTouchingLayers(ground))
@@ -315,7 +327,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Jump()
-    { 
+    {
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
     }
 
@@ -325,16 +337,11 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(ReloadLevel());
     }
 
-    IEnumerator ReloadLevel()
+    private IEnumerator ReloadLevel()
     {
         transition.SetTrigger("Start");
         yield return new WaitForSeconds(transitionTime);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        
     }
 
-    //public void PlayButton()
-    //{
-    //    SceneManager.LoadScene(currentLevel);
-    //}
 }

@@ -20,8 +20,22 @@ public class BackgroundAudio : MonoBehaviour
     }
 
     void Start()
-    {
+    {        
         music = GetComponent<AudioSource>();
-        music.Play();
+        music.Play();        
     }
+
+     public void ChangeMusic(bool on)
+    {
+        if (on == true)
+        {
+            music.Play();
+        }
+        else
+        {
+            music.Stop();
+        }
+    }
+
+
 }
