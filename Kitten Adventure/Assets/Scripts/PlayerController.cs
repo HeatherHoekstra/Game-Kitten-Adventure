@@ -38,6 +38,9 @@ public class PlayerController : MonoBehaviour
     private bool pauseTimer = true;
     public float transitionTime = 1f;
 
+    public int currentLevel = 1;
+    
+
     //Functions from other scripts
     public HealthBarScript healthBar;
     public LevelLoaderScript levelLoader;
@@ -50,7 +53,7 @@ public class PlayerController : MonoBehaviour
         cColl = GetComponent<CapsuleCollider2D>();               
 
         timeLeft = maxTime;
-        healthBar.SetMaxHealth(maxTime);
+        healthBar.SetMaxHealth(maxTime);        
     }
 
     private void Update()
@@ -188,10 +191,14 @@ public class PlayerController : MonoBehaviour
         if (collision.tag == "EndLevelBox")
         {
             state = State.endLevel;
+            
             rb.transform.position = collision.transform.position;
             rb.transform.localScale = collision.transform.localScale;
             rb.velocity = new Vector2(0, 0);
             frozen = true;
+            
+            currentLevel++;
+            PlayerPrefs.SetInt("CurrentLevel", currentLevel);
 
             levelLoader.LoadNextLevel();
             
@@ -200,12 +207,17 @@ public class PlayerController : MonoBehaviour
         if(collision.tag == "EndGameBasket")
         {
             state = State.endGame;
+            
             rb.transform.position = collision.transform.position;
             rb.transform.localScale = collision.transform.localScale;
             rb.velocity = new Vector2(0, 0);
             rb.gravityScale = 0;
             frozen = true;
+            
             Destroy(collision.gameObject);
+
+            currentLevel = 1;
+            PlayerPrefs.SetInt("CurrentLevel", currentLevel);
 
             levelLoader.LoadNextLevel();
         }
@@ -318,5 +330,11 @@ public class PlayerController : MonoBehaviour
         transition.SetTrigger("Start");
         yield return new WaitForSeconds(transitionTime);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        
     }
+
+    //public void PlayButton()
+    //{
+    //    SceneManager.LoadScene(currentLevel);
+    //}
 }
