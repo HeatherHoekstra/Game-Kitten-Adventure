@@ -14,46 +14,74 @@ public class Settings : MonoBehaviour
     [SerializeField] private Image soundImage;
     [SerializeField] private AudioSource pickup;
 
-    private bool musicOn = true;
-    private bool soundOn = true;
+    private static int musicOn = 0; //true
+    private static int soundOn = 0; //true
 
     public BackgroundAudio musicAudio;
-    public PlayerController soundAudio;
-    
+            
+
+    private void Start()
+    {
+        soundOn = PlayerPrefs.GetInt("SoundOn");
+        musicOn = PlayerPrefs.GetInt("MusicOn");
+
+        if (soundOn == 0)
+        {
+            soundImage.sprite = sound;
+        }
+        else
+        {
+            soundImage.sprite = noSound;
+        }
+
+        if (musicOn == 0)
+        {
+            musicImage.sprite = music;
+        }
+        else
+        {
+            musicImage.sprite = noMusic;
+        }
+    }
+
     public void MusicButton()
     {        
-        if (musicOn)
+        if (musicOn == 0)
         {
             musicImage.sprite = noMusic;                       
-            musicOn = false;
-            musicAudio.ChangeMusic(musicOn);
+            musicOn = 1;
+            PlayerPrefs.SetInt("MusicOn", musicOn);
+            musicAudio.ChangeMusic();
         }
         else
         {            
             musicImage.sprite = music;
-            musicOn = true;
-            musicAudio.ChangeMusic(musicOn);
-                      
+            musicOn = 0;
+            PlayerPrefs.SetInt("MusicOn", musicOn);
+            musicAudio.ChangeMusic();
         }
 
     }
 
     public void SoundButton()
     {
-        if (soundOn)
+        if (soundOn == 0)
         {
             soundImage.sprite = noSound;            
-            soundOn = false;
-            soundAudio.ChangeSound(soundOn);
+            soundOn = 1;
+            PlayerPrefs.SetInt("SoundOn", soundOn);
+            
         }
         else
         {
             soundImage.sprite = sound;            
-            soundOn = true;
-            soundAudio.ChangeSound(soundOn);
+            soundOn = 0;
+            PlayerPrefs.SetInt("SoundOn", soundOn);
             pickup.Play();
+            
         }
     }
+
 
    
 }

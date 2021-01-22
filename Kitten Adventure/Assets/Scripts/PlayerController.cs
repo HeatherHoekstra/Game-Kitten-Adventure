@@ -39,14 +39,14 @@ public class PlayerController : MonoBehaviour
     private bool pauseTimer = true;
     public float transitionTime = 1f;
 
-    private bool soundOn;
-
-    public int currentLevel = 1;
+    //public int currentLevel = 1;
 
     //Functions from other scripts
     public HealthBarScript healthBar;
 
     public LevelLoaderScript levelLoader;
+
+    public Settings soundSettings;
 
     private void Start()
     {
@@ -58,7 +58,8 @@ public class PlayerController : MonoBehaviour
         timeLeft = maxTime;
         healthBar.SetMaxHealth(maxTime);
 
-        //PlayerPrefs.SetInt("CurrentLevel", 0);      
+        //PlayerPrefs.SetInt("CurrentLevel", 0); 
+        PlayerPrefs.GetInt("SoundOn");
         
     }
 
@@ -75,21 +76,10 @@ public class PlayerController : MonoBehaviour
         PlayerSoundHandler();
     }
 
-    public void ChangeSound(bool on)
-    {
-        if (on)
-        {
-            soundOn = true;
-        }
-        else
-        {
-            soundOn = false;            
-        }
-    }
 
     private void PlayerSoundHandler()
     {
-        if (soundOn)
+        if (PlayerPrefs.GetInt("SoundOn") == 0)
         {
             if (!purring.isPlaying && state == State.inBox ^ state == State.endLevel ^ state == State.endGame)
             {
@@ -161,7 +151,7 @@ public class PlayerController : MonoBehaviour
         //Collectables
         if (collision.tag == "Collectable" && collision.IsTouching(bColl))
         {
-            if (soundOn)
+            if (PlayerPrefs.GetInt("SoundOn") == 0)
             {
                 pickup.Play();
             }
@@ -230,8 +220,8 @@ public class PlayerController : MonoBehaviour
 
             Destroy(collision.gameObject);
 
-            currentLevel = 0;
-            PlayerPrefs.SetInt("CurrentLevel", currentLevel);
+            //currentLevel = 0;
+            //PlayerPrefs.SetInt("CurrentLevel", currentLevel);
 
             levelLoader.LoadNextLevel();
         }

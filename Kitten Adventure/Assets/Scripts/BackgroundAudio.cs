@@ -4,30 +4,36 @@ using UnityEngine;
 
 public class BackgroundAudio : MonoBehaviour
 {
-    private static BackgroundAudio instance = null;
+   // private static BackgroundAudio instance = null;
     private AudioSource music;
 
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-            return;
-        }
-        if (instance == this) return;
-        Destroy(gameObject);
-    }
+    //private void Awake()
+    //{
+    //    if (instance == null)
+    //    {
+    //        instance = this;
+    //        DontDestroyOnLoad(gameObject);
+    //        return;
+    //    }
+    //    if (instance == this) return;
+    //    Destroy(gameObject);
+
+        
+    //}
 
     void Start()
-    {        
+    {  
+        PlayerPrefs.GetInt("MusicOn");      
         music = GetComponent<AudioSource>();
-        music.Play();        
+
+        if(PlayerPrefs.GetInt("MusicOn") == 0) { 
+        music.Play();
+        }
     }
 
-     public void ChangeMusic(bool on)
+    public void ChangeMusic()
     {
-        if (on == true)
+        if(PlayerPrefs.GetInt("MusicOn") == 0)
         {
             music.Play();
         }
@@ -36,6 +42,7 @@ public class BackgroundAudio : MonoBehaviour
             music.Stop();
         }
     }
+
 
 
 }

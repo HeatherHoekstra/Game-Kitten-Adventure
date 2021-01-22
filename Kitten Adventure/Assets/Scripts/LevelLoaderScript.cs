@@ -14,7 +14,18 @@ public class LevelLoaderScript : MonoBehaviour
 
     private void Start()
     {
-       currentLevel = PlayerPrefs.GetInt("CurrentLevel");  
+        currentLevel= SceneManager.GetActiveScene().buildIndex;
+        
+        if(currentLevel > 5)
+        {
+            PlayerPrefs.SetInt("CurrentLevel", 0);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("CurrentLevel", currentLevel);
+        }        
+        Debug.Log(currentLevel);
+        Debug.Log(PlayerPrefs.GetInt("CurrentLevel"));
     }
     public void LoadNextLevel()
     {
@@ -23,13 +34,9 @@ public class LevelLoaderScript : MonoBehaviour
 
     IEnumerator LoadLevel(int levelIndex)
     {
-
-        currentLevel += 1;
-        PlayerPrefs.SetInt("CurrentLevel", currentLevel);
         yield return new WaitForSeconds(waitTime);
         transition.SetTrigger("Start");
         yield return new WaitForSeconds(transitionTime);
-        SceneManager.LoadScene(levelIndex);
-        
+        SceneManager.LoadScene(levelIndex);       
     }
 }
