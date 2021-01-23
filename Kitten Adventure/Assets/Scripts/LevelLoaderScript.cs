@@ -23,9 +23,7 @@ public class LevelLoaderScript : MonoBehaviour
         else
         {
             PlayerPrefs.SetInt("CurrentLevel", currentLevel);
-        }        
-        Debug.Log(currentLevel);
-        Debug.Log(PlayerPrefs.GetInt("CurrentLevel"));
+        } 
     }
     public void LoadNextLevel()
     {
